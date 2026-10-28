@@ -1,42 +1,49 @@
-"""List WAV paths and labels using the notebook's Wav2Vec2 folder logic.
+"""List WAV paths and labels using helpers adapted from the notebook.
 
-The split-folder loader indexes each split independently. A missing class folder
-can change its numeric labels; this module does not repair that behavior.
+The split-folder helper uses one class mapping from train for all splits. This
+change applies only to this module; the original notebook remains unchanged and
+its evaluation and data-leakage limitations remain.
 """
 
 import os
 
 
 def load_data(data_dir):
+    """List train/val/test paths using class indices defined by train folders.
+
+    Missing split directories return empty lists. A class directory in val or
+    test that is absent from train raises ValueError, even when it is empty.
     """
-    โหลดข้อมูลแบบโครงสร้าง:
-    data_dir/
-        train/
-            class1/
-            class2/
-        val/
-            ...
-        test/
-            ...
-    """
-    def get_files_and_labels(split_dir):
-        files, labels, classes = [], [], []
+    def get_classes(split_dir):
         if not os.path.exists(split_dir):
-            return files, labels, classes
-        classes = sorted([d for d in os.listdir(split_dir) if os.path.isdir(os.path.join(split_dir, d))])
-        for i, class_name in enumerate(classes):
+            return []
+        return sorted(
+            name for name in os.listdir(split_dir)
+            if os.path.isdir(os.path.join(split_dir, name))
+        )
+
+    class_names = get_classes(os.path.join(data_dir, "train"))
+    label_map = {name: index for index, name in enumerate(class_names)}
+
+    def get_files_and_labels(split):
+        split_dir = os.path.join(data_dir, split)
+        files, labels = [], []
+        for class_name in get_classes(split_dir):
+            if class_name not in label_map:
+                raise ValueError(
+                    f"Unknown class {class_name!r} in {split} split; not found in train"
+                )
             class_dir = os.path.join(split_dir, class_name)
             for file in os.listdir(class_dir):
-                if file.endswith('.wav'):
+                if file.endswith(".wav"):
                     files.append(os.path.join(class_dir, file))
-                    labels.append(i)
-        return files, labels, classes
+                    labels.append(label_map[class_name])
+        return files, labels
 
-    train_files, train_labels, class_names = get_files_and_labels(os.path.join(data_dir, 'train'))
-    val_files, val_labels, _ = get_files_and_labels(os.path.join(data_dir, 'val'))
-    test_files, test_labels, _ = get_files_and_labels(os.path.join(data_dir, 'test'))
-
-    return (train_files, train_labels), (val_files, val_labels), (test_files, test_labels), class_names
+    train = get_files_and_labels("train")
+    val = get_files_and_labels("val")
+    test = get_files_and_labels("test")
+    return train, val, test, class_names
 
 
 def load_full_data(data_dir):

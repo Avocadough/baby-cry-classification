@@ -24,7 +24,7 @@ Open [`DE_G15_Code.ipynb`](DE_G15_Code.ipynb) in Jupyter or Google Colab. The or
 
 ## Inspect a WAV folder
 
-[`baby_cry_data.py`](baby_cry_data.py) extracts the Wav2Vec2 notebook's `load_full_data` and `load_data` functions into a small standard-library helper. It lists file paths and numeric labels; it does **not** open audio, train a model, run inference or fix the evaluation issues below. The notebook remains self-contained and does not import this helper.
+[`baby_cry_data.py`](baby_cry_data.py) adapts the Wav2Vec2 notebook's folder-listing functions into a small standard-library helper. Its split loader uses one class mapping from `train/` across all splits, unlike the original notebook. It lists file paths and numeric labels; it does **not** open audio, train a model, run inference or fix data leakage. The notebook remains unchanged and does not import this helper; historical results have not been reproduced.
 
 For a folder with one subdirectory per class, such as `dataset/hungry/*.wav` and `dataset/tired/*.wav`:
 
@@ -44,7 +44,7 @@ train, validation, test, classes = load_data("path/to/splits")
 print(classes, len(train[0]), len(validation[0]), len(test[0]))
 ```
 
-Each split is a `(paths, numeric_labels)` pair. As in the notebook, only entries ending in lowercase `.wav` are selected, their order follows the filesystem, missing split directories yield empty lists, and **each split independently sorts and numbers its class directories**. A class missing from one split can therefore give the same number a different meaning. Check the actual folder layout before using these lists; this helper does not verify file type or content, consent, or split independence.
+Each split is a `(paths, numeric_labels)` pair. The helper sorts the training class directories to establish the mapping, then uses it for validation and test. Those splits may omit classes, but an unknown class directory raises `ValueError` even if it is empty. Missing split directories yield empty lists; if training is missing and another split has a class, that class is unknown. As in the notebook, only entries ending in lowercase `.wav` are selected and their order follows the filesystem. The helper does not verify file type or content, consent, or split independence.
 
 Run the helper tests from the repository root with Python 3; they create only empty synthetic placeholder files and use the standard library:
 

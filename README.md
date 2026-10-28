@@ -1,6 +1,13 @@
-# Baby Cry Audio Classification
-
-A notebook exploring classification of infant cry recordings with a CNN and a Wav2Vec2-based comparison model.
+<div align="center">
+  <h1>Baby Cry Audio Classification</h1>
+  <p>A notebook exploring classification of infant cry recordings with a CNN and a Wav2Vec2-based comparison model.</p>
+  <p>
+    <img src="https://img.shields.io/badge/TensorFlow-Keras-FF6F00?style=flat-square" alt="TensorFlow and Keras">
+    <img src="https://img.shields.io/badge/PyTorch-Wav2Vec2-EE4C2C?style=flat-square" alt="PyTorch Wav2Vec2">
+    <img src="https://img.shields.io/badge/librosa-Audio-8052A1?style=flat-square" alt="librosa audio">
+  </p>
+  <p><a href="#approach">Approach</a> · <a href="#open-the-notebook">Notebook</a> · <a href="#results-and-limitations">Results and limitations</a></p>
+</div>
 
 ## Approach
 
